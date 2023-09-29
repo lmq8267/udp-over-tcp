@@ -63,7 +63,7 @@ jobs:
           mkdir -p /opt/mipsel
           cd /opt/udp
           cargo build --target=mipsel-unknown-linux-musl --release --features env_logger --features clap --bins
-          cd /opt/vnt/target/mipsel-unknown-linux-musl/release
+          cd /opt/udp/target/mipsel-unknown-linux-musl/release
           ls
            cd /opt/vnt-mipsel
           /opt/st/strip /opt/vnt-mipsel/vnt-cli
