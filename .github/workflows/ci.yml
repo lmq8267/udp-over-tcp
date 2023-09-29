@@ -39,7 +39,9 @@ jobs:
           path: |
             ~/.cargo/registry
             ./target
-          key: build-cargo-registry-mipsel-unknown-linux-musl
+          key: |
+           build-cargo-registry-mipsel-unknown-linux-musl
+           build-cargo-registry-aarch64-unknown-linux-musl
       - name: List
         run: find ./
       - 
@@ -50,34 +52,51 @@ jobs:
           tar zxf ./musl_gcc/mipsel-linux-musl-cross.tgz -C ./musl_gcc/
           sudo ln -s $(pwd)/musl_gcc/mipsel-linux-musl-cross/bin/*gcc /usr/bin/
           rustup target add mipsel-unknown-linux-musl
+          wget -c https://musl.cc/aarch64-linux-musl-cross.tgz -P ./musl_gcc/
+          tar zxf ./musl_gcc/aarch64-linux-musl-cross.tgz -C ./musl_gcc/
+          sudo ln -s $(pwd)/musl_gcc/aarch64-linux-musl-cross/bin/*gcc /usr/bin/
+          sudo ln -s $(pwd)/musl_gcc/aarch64-linux-musl-cross/bin/aarch64-linux-musl-strip /opt/striparm
+          rustup target add aarch64-unknown-linux-musl
           cat >>~/.cargo/config <<EOF
           [target.mipsel-unknown-linux-musl]
           linker = "mipsel-linux-musl-gcc"
+          rustflags = ["-C", "target-feature=+crt-static"]
+          [target.aarch64-unknown-linux-musl]
+          linker = "aarch64-linux-musl-gcc"
           rustflags = ["-C", "target-feature=+crt-static"]
           EOF
           git clone https://github.com/mullvad/udp-over-tcp.git /opt/udp
           git clone https://github.com/lmq8267/cloudflared.git /opt/st
           tar -xvf /opt/st/upx-3.95-amd64_linux.tar.xz -C /opt
           chmod 777 /opt/upx-3.95-amd64_linux/upx
+          tar -xvf /opt/st/upx-4.1.0-amd64_linux.tar.xz -C /opt
+          chmod 777 /opt/upx-3.95-amd64_linux/upx
+          chmod 777 /opt/upx-4.1.0-amd64_linux/upx
+          chmod 777 /opt/striparm
           chmod 777 /opt/st/strip
-          mkdir -p /opt/mipsel
+          mkdir -p /opt/tcp
           cd /opt/udp
+          echo "tag=$(cat /opt/udp/Cargo.toml | grep 'version =' | awk -F 'version' {'print $2'} | head -n 1 | tr -d '= " ')" >> $GITHUB_ENV
           cargo build --target=mipsel-unknown-linux-musl --release --features env_logger --features clap --bins
-          cd /opt/udp/target/mipsel-unknown-linux-musl/release
-          ls
-           cd /opt/vnt-mipsel
-          /opt/st/strip /opt/vnt-mipsel/vnt-cli
-          /opt/upx-3.95-amd64_linux/upx --lzma --best vnt-cli
-          echo $(md5sum vnt-cli | awk '{print $1;}') >MD5.txt
-          cd /opt/vnt
+          cp -rf /opt/udp/target/mipsel-unknown-linux-musl/release/tcp2udp /opt/tcp/tcp2udp_mipsel
+          cp -rf /opt/udp/target/mipsel-unknown-linux-musl/release/tcp2udp /opt/tcp/udp2tcp_mipsel
+          cp -rf /opt/udp/target/mipsel-unknown-linux-musl/release/tcp2udp /opt/tcp/tcp2udp.d_mipsel
+          cp -rf /opt/udp/target/mipsel-unknown-linux-musl/release/tcp2udp /opt/tcp/tcp2udp.d_mipsel
           cargo clean
-          cargo build --package vnt-cli --target=mipsel-unknown-linux-musl --release --features default
-          mkdir -p /opt/vnt1
-          cp -f /opt/vnt/target/mipsel-unknown-linux-musl/release/vnt-cli /opt/vnt1/vnt-cli_lite
-          cd /opt/vnt1
-          /opt/st/strip /opt/vnt1/vnt-cli_lite
-          /opt/upx-3.95-amd64_linux/upx --lzma --best vnt-cli_lite
-          echo $(md5sum vnt-cli_lite | awk '{print $1;}') >lite_MD5.txt
+          cargo build --target=aarch64-unknown-linux-musl --release --features env_logger --features clap --bins
+          cp -rf /opt/udp/target/aarch64-unknown-linux-musl/release/tcp2udp /opt/tcp/tcp2udp_arm64
+          cp -rf /opt/udp/target/aarch64-unknown-linux-musl/release/tcp2udp /opt/tcp/udp2tcp_arm64
+          cp -rf /opt/udp/target/aarch64-unknown-linux-musl/release/tcp2udp /opt/tcp/tcp2udp.d_arm64
+          cp -rf /opt/udp/target/aarch64-unknown-linux-musl/release/tcp2udp /opt/tcp/tcp2udp.d_arm64
+           cd /opt/tcp
+          /opt/st/strip /opt/tcp/tcp2udp_mipsel
+          /opt/st/strip /opt/tcp/udp2tcp_mipsel
+          /opt/striparm /opt/tcp/tcp2udp_arm64
+          /opt/striparm /opt/tcp/udp2tcp_arm64
+          /opt/upx-3.95-amd64_linux/upx --lzma --best tcp2udp_mipsel
+          /opt/upx-3.95-amd64_linux/upx --lzma --best udp2tcp_mipsel
+          /opt/upx-4.1.0-amd64_linux/upx --lzma --best tcp2udp_arm64
+          /opt/upx-4.1.0-amd64_linux/upx --lzma --best udp2tcp_arm64
           echo "build_time=$(date '+%Y-%m-%d %H:%M:%S')" >> $GITHUB_ENV
       - 
         name: 发布
@@ -87,21 +106,9 @@ jobs:
           body: |
            > ### 编译时间 ：${{ env.build_time }}
 
-           ### **各版本区别**
-           
-           - **vnt-cli** ：正常版 MD5.txt为其MD5检验值 
-           
-           - **vnt-cli_lite** ：去掉openssl的精简版 lite_MD5.txt为其MD5校验值
-
-           如果使用加密，则集成openssl的速度更快，不加密是否集成openssl都不影响速度。
-
-           **[官方更新说明](https://github.com/lbl8603/vnt/releases)**
-          tag_name: ${{ needs.check.outputs.ver }}
+          tag_name: ${{ env.tag }}
           files: |
-              /opt/vnt-mipsel/vnt-cli
-              /opt/vnt-mipsel/MD5.txt
-              /opt/vnt1/vnt-cli_lite
-              /opt/vnt1/lite_MD5.txt
+              /opt/tcp/*
       - 
        name: 删除工作流
        uses: GitRML/delete-workflow-runs@main
