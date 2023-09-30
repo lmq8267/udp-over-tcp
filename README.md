@@ -1,9 +1,8 @@
 # udp-over-tcp
 
-A library (and binaries) for tunneling UDP datagrams over a TCP stream.
+用于通过 TCP 流传输 UDP 数据报的库（和二进制文件）。
 
-Some programs/protocols only work over UDP. And some networks only allow TCP. This is where
-`udp-over-tcp` comes in handy. This library comes in two parts:
+某些程序/协议只能通过 UDP 运行。有些网络只允许 TCP。这就是 `udp-over-tcp`派上用场的地方。该库分为两部分：
 
 * `udp2tcp` - Forwards incoming UDP datagrams over a TCP stream. The return stream
   is translated back to datagrams and sent back out over UDP again.
