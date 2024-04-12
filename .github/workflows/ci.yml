@@ -51,6 +51,8 @@ jobs:
           wget -c https://musl.cc/mipsel-linux-musl-cross.tgz -P ./musl_gcc/
           tar zxf ./musl_gcc/mipsel-linux-musl-cross.tgz -C ./musl_gcc/
           sudo ln -s $(pwd)/musl_gcc/mipsel-linux-musl-cross/bin/*gcc /usr/bin/
+          rustup install 1.72.1
+          rustup default 1.72.1
           rustup target add mipsel-unknown-linux-musl
           wget -c https://musl.cc/aarch64-linux-musl-cross.tgz -P ./musl_gcc/
           tar zxf ./musl_gcc/aarch64-linux-musl-cross.tgz -C ./musl_gcc/
