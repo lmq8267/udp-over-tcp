@@ -78,6 +78,7 @@ jobs:
           chmod 777 /opt/st/strip
           mkdir -p /opt/tcp
           cd /opt/udp
+          sed -i 's/rust-version = "1.77.0"/rust-version = "1.72.1"/g' ./Cargo.toml
           echo "tag=$(cat /opt/udp/Cargo.toml | grep 'version =' | awk -F 'version' {'print $2'} | head -n 1 | tr -d '= " ')" >> $GITHUB_ENV
           cargo build --target=mipsel-unknown-linux-musl --release --features env_logger --features clap --features statsd --bins
           cd /opt/udp/target/mipsel-unknown-linux-musl/release
