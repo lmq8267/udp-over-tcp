@@ -19,7 +19,7 @@ jobs:
         id: getversion
         run: |
           ver=`curl https://api.github.com/repos/mullvad/udp-over-tcp/releases/latest | jq -r '.tag_name'`
-          cver=`curl https://api.github.com/repos/lmq8267/tailscale/releases/latest | jq -r '.tag_name'`
+          cver=`curl https://api.github.com/repos/lmq8267/udp-over-tcp/releases/latest | jq -r '.tag_name'`
           echo "ver=${ver}" >> $GITHUB_OUTPUT
           echo "cver=${cver}" >> $GITHUB_OUTPUT
 
@@ -77,20 +77,20 @@ jobs:
           mkdir -p /opt/tcp
           cd /opt/udp
           echo "tag=$(cat /opt/udp/Cargo.toml | grep 'version =' | awk -F 'version' {'print $2'} | head -n 1 | tr -d '= " ')" >> $GITHUB_ENV
-          cargo build --target=mipsel-unknown-linux-musl --release --features env_logger --features clap --bins
+          cargo build --target=mipsel-unknown-linux-musl --release --features env_logger --features clap --features statsd --bins
           cd /opt/udp/target/mipsel-unknown-linux-musl/release
           ls -la
           cd /opt/udp
           cp -rf /opt/udp/target/mipsel-unknown-linux-musl/release/tcp2udp /opt/tcp/tcp2udp_mipsel
           cp -rf /opt/udp/target/mipsel-unknown-linux-musl/release/tcp2udp /opt/tcp/udp2tcp_mipsel
-          cp -rf /opt/udp/target/mipsel-unknown-linux-musl/release/tcp2udp /opt/tcp/tcp2udp.d_mipsel
-          cp -rf /opt/udp/target/mipsel-unknown-linux-musl/release/tcp2udp /opt/tcp/udp2tcp.d_mipsel
+          #cp -rf /opt/udp/target/mipsel-unknown-linux-musl/release/tcp2udp /opt/tcp/tcp2udp.d_mipsel
+          #cp -rf /opt/udp/target/mipsel-unknown-linux-musl/release/tcp2udp /opt/tcp/udp2tcp.d_mipsel
           cargo clean
-          cargo build --target=aarch64-unknown-linux-musl --release --features env_logger --features clap --bins
+          cargo build --target=aarch64-unknown-linux-musl --release --features env_logger --features clap --features statsd --bins
           cp -rf /opt/udp/target/aarch64-unknown-linux-musl/release/tcp2udp /opt/tcp/tcp2udp_arm64
           cp -rf /opt/udp/target/aarch64-unknown-linux-musl/release/tcp2udp /opt/tcp/udp2tcp_arm64
-          cp -rf /opt/udp/target/aarch64-unknown-linux-musl/release/tcp2udp /opt/tcp/tcp2udp.d_arm64
-          cp -rf /opt/udp/target/aarch64-unknown-linux-musl/release/tcp2udp /opt/tcp/udp2tcp.d_arm64
+          #cp -rf /opt/udp/target/aarch64-unknown-linux-musl/release/tcp2udp /opt/tcp/tcp2udp.d_arm64
+          #cp -rf /opt/udp/target/aarch64-unknown-linux-musl/release/tcp2udp /opt/tcp/udp2tcp.d_arm64
            cd /opt/tcp
           /opt/st/strip /opt/tcp/tcp2udp_mipsel
           /opt/st/strip /opt/tcp/udp2tcp_mipsel
