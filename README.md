@@ -1,4 +1,13 @@
 # udp-over-tcp
+<p align="center">
+<a href="https://github.com/lmq8267/udp-over-tcp/releases"><img src="https://img.shields.io/github/downloads/lmq8267/udp-over-tcp/total">
+<a href="https://github.com/lmq8267/udp-over-tcp/graphs/contributors"><img src="https://img.shields.io/github/contributors-anon/lmq8267/udp-over-tcp">
+<a href="https://github.com/lmq8267/udp-over-tcp/releases/"><img src="https://img.shields.io/github/release/lmq8267/udp-over-tcp">
+<a href="https://github.com/lmq8267/udp-over-tcp/issues"><img src="https://img.shields.io/github/issues-raw/lmq8267/udp-over-tcp">
+<a href="https://github.com/lmq8267/udp-over-tcp/discussions"><img src="https://img.shields.io/github/discussions/lmq8267/udp-over-tcp">
+<a href="GitHub repo size"><img src="https://img.shields.io/github/repo-size/lmq8267/udp-over-tcp?color=red&style=flat-square">
+<a href="https://github.com/lmq8267/udp-over-tcp/actions?query=workflow%3ABuild"><img src="https://img.shields.io/github/actions/workflow/status/lmq8267/udp-over-tcp/ci.yml?branch=main" alt="Build status">
+</p>
 
 用于通过 TCP 流传输 UDP 数据报的库（和二进制文件）。
 
